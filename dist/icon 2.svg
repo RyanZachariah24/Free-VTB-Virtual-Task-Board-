@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="50%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <linearGradient id="boardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background with Safe Margin (Maskable friendly) -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+
+  <!-- App Border subtle glow -->
+  <rect x="12" y="12" width="488" height="488" rx="100" fill="none" stroke="#38BDF8" stroke-width="4" stroke-opacity="0.3" />
+
+  <!-- Kanban Column 1 (To Do) -->
+  <g filter="url(#shadow)">
+    <rect x="76" y="96" width="96" height="320" rx="16" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+    <rect x="92" y="116" width="64" height="12" rx="6" fill="#64748B"/>
+    <rect x="90" y="148" width="68" height="60" rx="10" fill="#334155"/>
+    <rect x="90" y="222" width="68" height="84" rx="10" fill="#334155"/>
+  </g>
+
+  <!-- Kanban Column 2 (In Progress - Active) -->
+  <g filter="url(#shadow)">
+    <rect x="192" y="76" width="128" height="360" rx="20" fill="#1E293B" stroke="#60A5FA" stroke-width="3"/>
+    <rect x="212" y="100" width="88" height="14" rx="7" fill="#60A5FA"/>
+    <!-- Active Card with email badge -->
+    <rect x="208" y="134" width="96" height="120" rx="14" fill="url(#boardGrad)"/>
+    <rect x="224" y="154" width="64" height="10" rx="5" fill="#DBEAFE"/>
+    <rect x="224" y="174" width="48" height="8" rx="4" fill="#93C5FD"/>
+    
+    <!-- Mini Mail Icon inside card -->
+    <g transform="translate(224, 206)">
+      <rect width="32" height="22" rx="4" fill="#FFFFFF"/>
+      <path d="M2 3 L16 13 L30 3" fill="none" stroke="#1D4ED8" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Second card in doing -->
+    <rect x="208" y="270" width="96" height="80" rx="12" fill="#334155"/>
+    <rect x="224" y="288" width="56" height="8" rx="4" fill="#94A3B8"/>
+  </g>
+
+  <!-- Kanban Column 3 (Done) -->
+  <g filter="url(#shadow)">
+    <rect x="340" y="96" width="96" height="320" rx="16" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+    <rect x="356" y="116" width="64" height="12" rx="6" fill="url(#accentGrad)"/>
+    <rect x="354" y="148" width="68" height="72" rx="10" fill="#064E3B" stroke="#059669" stroke-width="2"/>
+    <path d="M374 184 L384 194 L404 174" fill="none" stroke="#34D399" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Bottom Floating Notification Floating Seal -->
+  <g filter="url(#shadow)" transform="translate(320, 310)">
+    <circle cx="48" cy="48" r="44" fill="url(#amberGrad)" stroke="#FEF3C7" stroke-width="4"/>
+    <!-- Email symbol -->
+    <rect x="24" y="30" width="48" height="36" rx="6" fill="#FFFFFF"/>
+    <path d="M26 33 L48 50 L70 33" fill="none" stroke="#D97706" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Notification badge on envelope -->
+    <circle cx="68" cy="28" r="10" fill="#EF4444" stroke="#FFFFFF" stroke-width="2"/>
+  </g>
+</svg>

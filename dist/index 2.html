@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // In AI Studio Build, HMR is disabled. Handle Vite HMR WebSocket in proxy/iframe environment.
+      (function () {
+        if (typeof window !== 'undefined') {
+          // 1. Intercept console.error to filter benign Vite HMR websocket disconnection logs
+          const origConsoleError = console.error;
+          console.error = function (...args) {
+            const isViteWsError = args.some((arg) => {
+              if (!arg) return false;
+              const text = (arg.message || arg.stack || String(arg) || '').toLowerCase();
+              return (
+                text.includes('websocket closed without opened') ||
+                text.includes('failed to connect to websocket') ||
+                text.includes('vite:ws:disconnect')
+              );
+            });
+            if (isViteWsError) {
+              return;
+            }
+            return origConsoleError.apply(console, args);
+          };
+
+          // 2. Intercept unhandledrejection
+          window.addEventListener(
+            'unhandledrejection',
+            function (event) {
+              const reason = event.reason;
+              const text = (reason?.message || reason?.stack || String(reason) || '').toLowerCase();
+              if (
+                text.includes('websocket closed without opened') ||
+                text.includes('failed to connect to websocket')
+              ) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+            },
+            true
+          );
+
+          // 3. Intercept window.onerror
+          window.addEventListener(
+            'error',
+            function (event) {
+              const text = (event.message || event.error?.message || '').toLowerCase();
+              if (
+                text.includes('websocket closed without opened') ||
+                text.includes('failed to connect to websocket')
+              ) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+            },
+            true
+          );
+
+          // 4. Proxy window.WebSocket for Vite HMR
+          const OrigWebSocket = window.WebSocket;
+          if (OrigWebSocket) {
+            window.WebSocket = new Proxy(OrigWebSocket, {
+              construct(target, args) {
+                const [url, protocols] = args;
+                const urlStr = String(url || '');
+                const isHmr =
+                  protocols === 'vite-hmr' ||
+                  protocols === 'vite-ping' ||
+                  (Array.isArray(protocols) && protocols.includes('vite-hmr')) ||
+                  urlStr.includes('vite-hmr') ||
+                  urlStr.includes('vite-ping') ||
+                  urlStr.includes('token=');
+
+                if (isHmr) {
+                  const emitter = new EventTarget();
+                  const fakeSocket = {
+                    url: urlStr,
+                    protocol: typeof protocols === 'string' ? protocols : '',
+                    readyState: 1, // WebSocket.OPEN
+                    CONNECTING: 0,
+                    OPEN: 1,
+                    CLOSING: 2,
+                    CLOSED: 3,
+                    binaryType: 'blob',
+                    bufferedAmount: 0,
+                    extensions: '',
+                    addEventListener: (type, listener, options) =>
+                      emitter.addEventListener(type, listener, options),
+                    removeEventListener: (type, listener, options) =>
+                      emitter.removeEventListener(type, listener, options),
+                    dispatchEvent: (event) => emitter.dispatchEvent(event),
+                    send: () => {},
+                    close: () => {
+                      fakeSocket.readyState = 3;
+                      emitter.dispatchEvent(new Event('close'));
+                    },
+                    onopen: null,
+                    onmessage: null,
+                    onerror: null,
+                    onclose: null,
+                  };
+                  setTimeout(() => {
+                    emitter.dispatchEvent(new Event('open'));
+                  }, 0);
+                  return fakeSocket;
+                }
+                return new target(...args);
+              },
+            });
+            window.WebSocket.CONNECTING = 0;
+            window.WebSocket.OPEN = 1;
+            window.WebSocket.CLOSING = 2;
+            window.WebSocket.CLOSED = 3;
+          }
+        }
+      })();
+    </script>
+    <title>Free VTB Virtual Task Board</title>
+    <meta name="description" content="Free VTB Virtual Task Board - Collaborative visual Kanban boards with automated notifications, sprint tracking, and live presence." />
+    <meta property="og:title" content="Free VTB Virtual Task Board" />
+    <meta property="og:description" content="Free VTB Virtual Task Board - Collaborative visual Kanban boards with automated notifications, sprint tracking, and live presence." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Free VTB Virtual Task Board" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script type="module" crossorigin src="/assets/index-CtYRsrsP.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-ztj63Zw4.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
