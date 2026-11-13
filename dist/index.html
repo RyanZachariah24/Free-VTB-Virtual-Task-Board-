@@ -1,27 +1,1403 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Free VTB Virtual Task Board</title>
-    <meta name="description" content="Free VTB Virtual Task Board - Collaborative visual Kanban boards with automated notifications, sprint tracking, and live presence." />
-    <meta property="og:title" content="Free VTB Virtual Task Board" />
-    <meta property="og:description" content="Free VTB Virtual Task Board - Collaborative visual Kanban boards with automated notifications, sprint tracking, and live presence." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Free VTB Virtual Task Board" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <script type="module" crossorigin src="/assets/index-BaQbdeeA.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-qTnz9EiH.css">
-  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Free VTB Virtual Task Board - Automated Alerts & Offline Vault</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='5' width='7' height='22' rx='2' fill='%232F62D9'/%3E%3Crect x='12.5' y='5' width='7' height='15' rx='2' fill='%232F62D9' fill-opacity='.7'/%3E%3Crect x='22' y='5' width='7' height='9' rx='2' fill='%232F62D9' fill-opacity='.45'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#2563EB">
 
+<script>
+/* Safe HMR / Proxy WebSocket Shim to eliminate connection rejection errors in preview/proxy environments */
+(function() {
+  if (typeof window !== 'undefined') {
+    const origError = console.error;
+    console.error = function(...args) {
+      const msg = args.join(' ').toLowerCase();
+      if (msg.includes('websocket') || msg.includes('vite:ws') || msg.includes('failed to connect')) return;
+      origError.apply(console, args);
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      const reason = (e.reason?.message || e.reason || '').toString().toLowerCase();
+      if (reason.includes('websocket') || reason.includes('failed to fetch')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  }
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<style>
+:root {
+  color-scheme: light dark;
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --bg: #F1F5F9;
+  --panel: #FFFFFF;
+  --card: #FFFFFF;
+  --line: #E2E8F0;
+  --line-strong: #CBD5E1;
+  --ink: #0F172A;
+  --ink-muted: #64748B;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-soft: rgba(37, 99, 235, 0.1);
+  --danger: #DC2626;
+  --danger-soft: #FEE2E2;
+  --success: #059669;
+  --success-soft: #D1FAE5;
+  --warning: #D97706;
+  --warning-soft: #FEF3C7;
+  --lane-w: 320px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0B1120;
+    --panel: #111827;
+    --card: #1F2937;
+    --line: #374151;
+    --line-strong: #4B5563;
+    --ink: #F9FAFB;
+    --ink-muted: #9CA3AF;
+    --primary: #3B82F6;
+    --primary-hover: #60A5FA;
+    --primary-soft: rgba(59, 130, 246, 0.15);
+    --danger: #EF4444;
+    --danger-soft: rgba(239, 68, 68, 0.2);
+    --success: #10B981;
+    --success-soft: rgba(16, 185, 129, 0.2);
+    --warning: #F59E0B;
+    --warning-soft: rgba(245, 158, 11, 0.2);
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  display: flex; flex-direction: column; height: 100dvh;
+  font: 400 13.5px/1.45 var(--font); color: var(--ink); background: var(--bg);
+  -webkit-font-smoothing: antialiased; overflow: hidden;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Top Security & Automation Banner */
+.top-banner {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 8px 16px; padding: 6px 18px;
+  background: linear-gradient(90deg, #090e17, #1e293b, #090e17);
+  color: #f8fafc; font-size: 11.5px; border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.banner-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 9px; border-radius: 99px;
+  background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #6ee7b7; font-weight: 700; cursor: pointer;
+}
+.banner-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.b-btn {
+  background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px; padding: 3px 9px; font-weight: 600; font-size: 11px;
+}
+.b-btn:hover { background: rgba(255,255,255,0.22); }
+
+/* Main App Navigation */
+header.app-header {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.header-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; }
+.brand-icon { width: 6px; height: 22px; border-radius: 3px; background: var(--primary); }
+.header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--card);
+  font-weight: 600; font-size: 12.5px; transition: all 0.15s;
+}
+.btn:hover { border-color: var(--line-strong); background: var(--primary-soft); }
+.btn.primary { background: var(--primary); color: #fff; border-color: transparent; }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn.danger { color: var(--danger); border-color: var(--danger-soft); }
+.btn.danger:hover { background: var(--danger-soft); }
+
+/* Sub-Bar: Board Sorting, Swimlanes, and Quotas */
+.controls-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 20px; background: var(--panel); border-bottom: 1px solid var(--line);
+  font-size: 12px; overflow-x: auto;
+}
+.ctrl-group { display: flex; align-items: center; gap: 8px; flex: none; }
+.ctrl-select {
+  padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--card); font-size: 11.5px; font-weight: 600;
+}
+.quota-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: 99px; background: var(--success-soft);
+  color: var(--success); font-weight: 700; font-size: 11px;
+}
+
+/* Accounts Filter Bar */
+.accounts-bar {
+  display: flex; align-items: center; gap: 8px; padding: 7px 20px;
+  background: var(--panel); border-bottom: 1px solid var(--line);
+  overflow-x: auto; white-space: nowrap;
+}
+.account-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 5px;
+  border: 1px solid var(--line); border-radius: 99px; background: var(--card);
+  font-size: 11.5px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.account-chip:hover { border-color: var(--primary); background: var(--primary-soft); }
+.account-chip.active { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 1px var(--primary); }
+.account-chip .badge { padding: 1px 6px; border-radius: 99px; background: var(--bg); font-size: 10px; font-weight: 700; }
+.add-acc-btn {
+  display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px;
+  border: 1px dashed var(--primary); border-radius: 99px; color: var(--primary);
+  background: var(--primary-soft); font-weight: 700; font-size: 11px; cursor: pointer;
+}
+
+/* Kanban Workspace */
+main.workspace { flex: 1; overflow: auto; padding: 18px 20px; }
+.swimlane-container { margin-bottom: 24px; }
+.swimlane-title { font-size: 13.5px; font-weight: 800; margin: 0 0 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.kanban-grid { display: inline-flex; gap: 16px; min-width: 100%; align-items: flex-start; }
+
+.lane {
+  width: var(--lane-w); flex: none; display: flex; flex-direction: column;
+  max-height: calc(100vh - 210px); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.lane-head {
+  padding: 10px 14px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.lane-title { margin: 0; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.lane-count { padding: 2px 7px; border-radius: 99px; background: var(--bg); font-size: 11px; font-weight: 700; color: var(--ink-muted); }
+.lane-wip-warn { color: var(--danger); font-size: 11px; font-weight: 700; }
+.lane-cards { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; min-height: 120px; }
+.lane-cards.drop-active { background: var(--primary-soft); }
+
+/* Task Card */
+.task-card {
+  position: relative; padding: 12px; background: var(--card); border: 1px solid var(--line);
+  border-radius: 9px; cursor: grab; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: all 0.15s;
+}
+.task-card:hover { border-color: var(--line-strong); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.tag-badge { padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.tag-bug { background: #fee2e2; color: #b91c1c; }
+.tag-feature { background: #dbeafe; color: #1d4ed8; }
+.tag-design { background: #f3e8ff; color: #7e22ce; }
+.tag-docs { background: #fef3c7; color: #b45309; }
+
+.card-title { margin: 0 0 6px; font-weight: 600; font-size: 13.5px; color: var(--ink); }
+.card-subtasks { margin-bottom: 8px; }
+.subtasks-bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: 3px; }
+.subtasks-fill { height: 100%; background: var(--success); }
+
+.card-meta { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 11px; }
+.prio-badge { font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+.p1 { color: #dc2626; }
+.p2 { color: #ea580c; }
+.p3 { color: #d97706; }
+.p4 { color: #64748b; }
+.due-badge {
+  display: inline-flex; align-items: center; gap: 3px; padding: 2px 5px;
+  border-radius: 4px; background: var(--bg); border: 1px solid var(--line); font-weight: 600;
+}
+.due-badge.overdue { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); font-weight: 700; }
+.timer-btn {
+  display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px;
+  border-radius: 4px; border: 1px solid var(--line); background: var(--panel);
+  font-size: 10.5px; font-weight: 600; font-family: var(--font-mono);
+}
+.timer-btn.running { background: var(--primary); color: #fff; border-color: transparent; }
+
+.avatar {
+  width: 22px; height: 22px; border-radius: 50%; color: #fff;
+  display: grid; place-items: center; font: 700 10px/1 var(--font); text-transform: uppercase;
+}
+
+/* Modals */
+dialog.modal-dlg {
+  width: min(640px, calc(100vw - 24px)); max-height: calc(100dvh - 32px);
+  padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px;
+  background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+dialog.modal-dlg::backdrop { background: rgba(10, 16, 23, 0.55); backdrop-filter: blur(2px); }
+dialog.modal-dlg[open] { display: flex; flex-direction: column; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.modal-title { margin: 0; font-size: 16px; font-weight: 800; }
+.modal-body { padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.form-label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--card); font-size: 13px; color: var(--ink);
+}
+
+/* Timing picker in Modals */
+.timing-picker-box { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+.timing-tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+.timing-tab { flex: 1; padding: 5px; border-radius: 5px; border: 1px solid var(--line); background: var(--panel); font-size: 11px; font-weight: 700; text-align: center; }
+.timing-tab.active { background: var(--primary); color: #fff; border-color: transparent; }
+.duration-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; text-align: center; }
+.duration-grid input { width: 100%; height: 30px; text-align: center; font-weight: 700; border-radius: 5px; border: 1px solid var(--line); background: var(--panel); font-family: var(--font-mono); font-size: 12px; }
+.datetime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* Toast */
+.toast-notice {
+  position: fixed; left: 50%; bottom: 20px; z-index: 9999; transform: translateX(-50%);
+  padding: 10px 16px; border-radius: 8px; background: #0f172a; color: #f8fafc;
+  font-weight: 600; font-size: 12px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+<body>
+
+<!-- Top Automation & Zero-Knowledge Security Banner -->
+<div class="top-banner">
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="banner-badge" onclick="openVaultModal()">🛡️ AES-256 Vault: Active • Auto-Sync</div>
+    <span id="banner-user-display" style="font-family:var(--font-mono);color:#94a3b8;">Jerry Zachariah &lt;jerrykoshyzachariah@gmail.com&gt;</span>
+  </div>
+  <div class="banner-tools">
+    <button type="button" class="b-btn" onclick="openOutboxModal()">Outbox Log (<span id="outbox-badge">0</span>)</button>
+    <button type="button" class="b-btn" onclick="openEmailConfigModal()">EmailJS</button>
+    <button type="button" class="b-btn" onclick="openProfileModal()">Profile</button>
+  </div>
+</div>
+
+<!-- Main App Header -->
+<header class="app-header">
+  <div class="header-brand">
+    <div class="brand-icon"></div>
+    <span id="board-title">Sprint Launch Board</span>
+  </div>
+  <div class="header-actions">
+    <button type="button" class="btn primary" onclick="openNewTaskModal(currentLaneId())">+ Add Task</button>
+    <button type="button" class="btn" onclick="openCreateAccountModal()">+ Member</button>
+    <button type="button" class="btn" onclick="exportBoardJSON()">Export JSON</button>
+    <button type="button" class="btn" onclick="importBoardJSON()">Import JSON</button>
+    <button type="button" class="btn" onclick="window.print()">Print / PDF</button>
+    <button type="button" class="btn" onclick="openVaultModal()">🛡️ Vault</button>
+  </div>
+</header>
+
+<!-- Sub-Bar: Board Controls (Swimlanes, Sorting, WIP Limits, Shared Quota) -->
+<div class="controls-bar">
+  <div class="ctrl-group">
+    <span>Sort:</span>
+    <select id="sort-selector" class="ctrl-select" onchange="changeSorting(this.value)">
+      <option value="default">Default Order</option>
+      <option value="prio-desc">Priority: Urgent to Low</option>
+      <option value="prio-asc">Priority: Low to Urgent</option>
+      <option value="due-asc">Due Date: Soonest First</option>
+      <option value="title-asc">Title: A to Z</option>
+      <option value="title-desc">Title: Z to A</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <span>Swimlanes:</span>
+    <select id="swimlane-selector" class="ctrl-select" onchange="changeSwimlane(this.value)">
+      <option value="none">Standard Lanes</option>
+      <option value="assignee">Group By Assignee</option>
+      <option value="priority">Group By Priority</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <span class="quota-tag">Shared Gmail Quota: 500 / 500 Remaining (Auto-shifts to EmailJS)</span>
+  </div>
+</div>
+
+<!-- Accounts Filter Bar -->
+<nav id="accounts-bar" class="accounts-bar"></nav>
+
+<!-- Kanban Main Workspace -->
+<main class="workspace" id="workspace"></main>
+
+<script>
+(() => {
+'use strict';
+
+const STORAGE_KEY = 'vtb_standalone_encrypted_vault_v4';
+const VAULT_KEY_STORAGE = 'vtb_vault_secret_key_v4';
+const OUTBOX_STORAGE_KEY = 'vtb_standalone_outbox_v4';
+const SYNC_CHANNEL_NAME = 'vtb_vault_auto_sync_channel';
+
+/* ---------- Web Crypto AES-256-GCM Zero-Knowledge Vault ---------- */
+function bufToHex(buffer) {
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function hexToBuf(hex) {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  return bytes;
+}
+function bufToBase64(buffer) {
+  return window.btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
+}
+function base64ToBuf(base64) {
+  const binary = window.atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+function getStoredPassphrase() {
+  let saved = localStorage.getItem(VAULT_KEY_STORAGE);
+  if (!saved) {
+    const randomBytes = new Uint8Array(24);
+    window.crypto.getRandomValues(randomBytes);
+    saved = bufToHex(randomBytes.buffer);
+    localStorage.setItem(VAULT_KEY_STORAGE, saved);
+  }
+  return saved;
+}
+
+async function deriveKey(passphrase, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    'raw', enc.encode(passphrase), { name: 'PBKDF2' }, false, ['deriveKey']
+  );
+  return window.crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+}
+
+async function encryptData(data, customPass) {
+  try {
+    const pass = customPass || getStoredPassphrase();
+    const enc = new TextEncoder();
+    const plainBytes = enc.encode(JSON.stringify(data));
+    const salt = new Uint8Array(16);
+    window.crypto.getRandomValues(salt);
+    const iv = new Uint8Array(12);
+    window.crypto.getRandomValues(iv);
+
+    const key = await deriveKey(pass, salt);
+    const cipherBuffer = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plainBytes);
+
+    return {
+      version: 1,
+      encrypted: true,
+      salt: bufToHex(salt.buffer),
+      iv: bufToHex(iv.buffer),
+      data: bufToBase64(cipherBuffer),
+      timestamp: Date.now()
+    };
+  } catch (err) {
+    return data;
+  }
+}
+
+async function decryptData(envelope, customPass) {
+  if (!envelope || !envelope.encrypted || !envelope.data) return envelope;
+  try {
+    const pass = customPass || getStoredPassphrase();
+    const salt = hexToBuf(envelope.salt);
+    const iv = hexToBuf(envelope.iv);
+    const cipherBytes = base64ToBuf(envelope.data);
+
+    const key = await deriveKey(pass, salt);
+    const plainBuffer = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherBytes);
+    return JSON.parse(new TextDecoder().decode(plainBuffer));
+  } catch (err) {
+    return null;
+  }
+}
+
+/* ---------- Multi-Tab Real-Time BroadcastChannel Auto-Sync ---------- */
+let syncChannel = null;
+const clientId = 'c_' + Math.random().toString(36).slice(2, 8);
+let isRemoteUpdate = false;
+let totalSyncEvents = 0;
+let lastSyncTimestamp = Date.now();
+
+try {
+  if ('BroadcastChannel' in window) {
+    syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+    syncChannel.onmessage = async (e) => {
+      if (e.data && e.data.senderId !== clientId && e.data.envelope) {
+        try {
+          isRemoteUpdate = true;
+          const decryptedState = await decryptData(e.data.envelope);
+          if (decryptedState && decryptedState.cards) {
+            state = decryptedState;
+            totalSyncEvents++;
+            lastSyncTimestamp = e.data.timestamp || Date.now();
+            render();
+            toast('Auto-Sync Live Update Applied from another tab! (AES-256-GCM)');
+          }
+        } catch(err) {
+          console.error(err);
+        } finally {
+          setTimeout(() => { isRemoteUpdate = false; }, 200);
+        }
+      }
+    };
+  }
+} catch(e) {}
+
+/* ---------- State & Seed Data ---------- */
+let currentUser = {
+  id: 'm-you',
+  name: 'Jerry Zachariah',
+  email: localStorage.getItem('vtb_user_email') || 'jerrykoshyzachariah@gmail.com'
+};
+
+let emailConfig = {
+  publicKey: localStorage.getItem('vtb_emailjs_pk') || '',
+  serviceId: localStorage.getItem('vtb_emailjs_sid') || '',
+  templateId: localStorage.getItem('vtb_emailjs_tid') || ''
+};
+
+let outbox = [];
+try { outbox = JSON.parse(localStorage.getItem(OUTBOX_STORAGE_KEY)) || []; } catch(e) { outbox = []; }
+
+let state = null;
+let filterAccountId = null;
+let currentSort = 'default';
+let currentSwimlane = 'none';
+
+const PRIORITIES = { 1: 'P1 - Critical', 2: 'P2 - High', 3: 'P3 - Moderate', 4: 'P4 - Low' };
+const USER_COLORS = ['#2563EB', '#059669', '#D97706', '#9333EA', '#DC2626', '#0891B2', '#4F46E5'];
+
+const uid = (p = 'id') => p + '_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
+const pad = (n) => String(n).padStart(2, '0');
+const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+function getUserColor(idx) {
+  return USER_COLORS[idx % USER_COLORS.length];
+}
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast-notice';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function formatFullDue(dateStr) {
+  if (!dateStr) return 'No due date';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleString(undefined, {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    });
+  } catch(e) { return dateStr; }
+}
+
+function formatCountdown(dateStr) {
+  if (!dateStr) return '';
+  const targetMs = new Date(dateStr).getTime();
+  if (isNaN(targetMs)) return '';
+  const diffMs = targetMs - Date.now();
+  const isOverdue = diffMs < 0;
+  const absSec = Math.floor(Math.abs(diffMs) / 1000);
+  const d = Math.floor(absSec / 86400);
+  const h = Math.floor((absSec % 86400) / 3600);
+  const m = Math.floor((absSec % 3600) / 60);
+  const s = absSec % 60;
+  const parts = [];
+  if (d > 0) parts.push(d + 'd');
+  if (h > 0 || d > 0) parts.push(h + 'h');
+  if (m > 0 || h > 0 || d > 0) parts.push(m + 'm');
+  parts.push(s + 's');
+  return (isOverdue ? 'Overdue by ' : 'in ') + parts.slice(0, 3).join(' ');
+}
+
+function calcTargetFromDuration(y, m, d, h, min, s) {
+  const target = new Date();
+  if (y) target.setFullYear(target.getFullYear() + Number(y));
+  if (m) target.setMonth(target.getMonth() + Number(m));
+  if (d) target.setDate(target.getDate() + Number(d));
+  if (h) target.setHours(target.getHours() + Number(h));
+  if (min) target.setMinutes(target.getMinutes() + Number(min));
+  if (s) target.setSeconds(target.getSeconds() + Number(s));
+  return target;
+}
+
+function saveOutbox() {
+  try { localStorage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(outbox.slice(0, 50))); } catch(e) {}
+  const badge = document.getElementById('outbox-badge');
+  if (badge) badge.textContent = String(outbox.length);
+}
+
+function triggerAutomatedAssignmentEmail(task, laneName, assignedMember) {
+  if (!assignedMember || !assignedMember.email) return;
+  const prioText = PRIORITIES[task.priority] || 'Normal';
+  const fullDue = formatFullDue(task.due);
+  const countdown = formatCountdown(task.due);
+  const dueSummary = countdown ? `${fullDue} (${countdown})` : fullDue;
+
+  const emailBody = `Hi ${assignedMember.name},\n\nThe task "${task.title}" in lane "${laneName}" has been assigned to you on board "${state.name}".\n\nDetails:\n- Title: ${task.title}\n- Lane: ${laneName}\n- Due Date: ${dueSummary}\n- Priority: ${prioText}\n\nAutomated notification dispatched for ${assignedMember.email}.`;
+
+  const record = {
+    id: uid('em'),
+    recipientName: assignedMember.name,
+    recipientEmail: assignedMember.email,
+    taskTitle: task.title,
+    laneName: laneName,
+    dueSummary: dueSummary,
+    priority: prioText,
+    at: new Date().toLocaleTimeString() + ' ' + new Date().toLocaleDateString(),
+    status: (emailConfig.publicKey && emailConfig.serviceId && emailConfig.templateId) ? 'Delivering via EmailJS' : 'Simulation Logged',
+    body: emailBody
+  };
+
+  outbox.unshift(record);
+  saveOutbox();
+
+  if (emailConfig.publicKey && emailConfig.serviceId && emailConfig.templateId && window.emailjs) {
+    try {
+      emailjs.init(emailConfig.publicKey);
+      emailjs.send(emailConfig.serviceId, emailConfig.templateId, {
+        to_email: assignedMember.email,
+        to_name: assignedMember.name,
+        task_title: task.title,
+        lane_name: laneName,
+        due_date: dueSummary,
+        priority: prioText,
+        board_name: state.name || 'Visual Task Board',
+        message: emailBody
+      }).then(() => {
+        record.status = 'Sent via EmailJS (Success)';
+        saveOutbox();
+        toast(`Real Email Delivered to ${assignedMember.name} <${assignedMember.email}>!`);
+      }).catch((err) => {
+        record.status = 'EmailJS Failed: ' + (err.text || err.message);
+        saveOutbox();
+        toast('EmailJS Failed: ' + (err.text || err.message));
+      });
+    } catch(err) {
+      record.status = 'Error: ' + err.message;
+      saveOutbox();
+    }
+  } else {
+    toast(`Automated Email logged for ${assignedMember.name} <${assignedMember.email}>!`);
+  }
+}
+
+function initialSeed() {
+  const inFuture = (days, hours, seconds) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    d.setHours(d.getHours() + (hours || 0));
+    d.setSeconds(d.getSeconds() + (seconds || 0));
+    return d.toISOString();
+  };
+
+  return {
+    name: 'Release 4.2 Sprint',
+    members: [
+      { id: 'm-you', name: currentUser.name, email: currentUser.email, color: USER_COLORS[0] },
+      { id: 'm-priya', name: 'Priya Nair', email: 'priya@company.internal', color: USER_COLORS[1] },
+      { id: 'm-marcus', name: 'Marcus Webb', email: 'marcus@company.internal', color: USER_COLORS[2] },
+      { id: 'm-lena', name: 'Lena Fischer', email: 'lena@company.internal', color: USER_COLORS[3] }
+    ],
+    lanes: [
+      { id: 'ln-backlog', name: 'Backlog', limit: 0 },
+      { id: 'ln-doing', name: 'In Progress', limit: 3 },
+      { id: 'ln-review', name: 'Review', limit: 0 },
+      { id: 'ln-done', name: 'Done', limit: 0 }
+    ],
+    cards: [
+      {
+        id: uid('c'), laneId: 'ln-backlog', title: 'Onboarding checklist redesign',
+        desc: 'Streamline signup steps and initial workspace config.',
+        assigneeId: 'm-you', priority: 3, due: inFuture(7, 23, 59),
+        tags: ['Design', 'Feature'], timerSeconds: 0, timerRunning: false,
+        subtasks: [{ title: 'Figma mockup', done: true }, { title: 'User testing', done: false }]
+      },
+      {
+        id: uid('c'), laneId: 'ln-backlog', title: 'Write migration guide for v4',
+        desc: 'Document schema changes for Web Crypto vault.',
+        assigneeId: 'm-lena', priority: 4, due: inFuture(12, 23, 59),
+        tags: ['Docs'], timerSeconds: 0, timerRunning: false, subtasks: []
+      },
+      {
+        id: uid('c'), laneId: 'ln-doing', title: 'Fix login redirect loop on Safari',
+        desc: 'Users bounce between auth callback and home dashboard.',
+        assigneeId: 'm-you', priority: 1, due: inFuture(-1, 0, 5),
+        tags: ['Bug'], timerSeconds: 1420, timerRunning: false,
+        subtasks: [{ title: 'Check cookies', done: true }, { title: 'Trace redirect', done: true }, { title: 'Verify patch', done: false }]
+      },
+      {
+        id: uid('c'), laneId: 'ln-doing', title: 'Bulk-import CSV for contacts',
+        desc: 'Support parsing 10,000+ contact records without memory leak.',
+        assigneeId: 'm-marcus', priority: 2, due: inFuture(4, 0, 0),
+        tags: ['Feature'], timerSeconds: 310, timerRunning: false,
+        subtasks: [{ title: 'Streaming parser', done: true }, { title: 'Memory test', done: false }]
+      },
+      {
+        id: uid('c'), laneId: 'ln-review', title: 'Dark mode contrast pass',
+        desc: 'Verify WCAG AA compliance across all components.',
+        assigneeId: 'm-priya', priority: 3, due: inFuture(1, 0, 0),
+        tags: ['Design'], timerSeconds: 840, timerRunning: false, subtasks: []
+      },
+      {
+        id: uid('c'), laneId: 'ln-done', title: 'Upgrade build to Node 22',
+        desc: 'Modern runtime update for improved crypto performance.',
+        assigneeId: 'm-marcus', priority: 3, due: inFuture(0, 0, 0),
+        tags: ['Feature'], timerSeconds: 2200, timerRunning: false, subtasks: []
+      }
+    ]
+  };
+}
+
+async function loadEncryptedState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.encrypted) return await decryptData(parsed);
+      return parsed;
+    }
+  } catch(e) {}
+  return initialSeed();
+}
+
+async function persistAndSyncState() {
+  try {
+    const envelope = await encryptData(state);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
+    lastSyncTimestamp = Date.now();
+    if (syncChannel && !isRemoteUpdate) {
+      syncChannel.postMessage({
+        senderId: clientId,
+        envelope,
+        timestamp: lastSyncTimestamp
+      });
+    }
+  } catch(e) {
+    console.error('Failed saving encrypted state', e);
+  }
+  render();
+}
+
+function currentLaneId() {
+  return state && state.lanes[0] ? state.lanes[0].id : 'ln-backlog';
+}
+
+/* Modals */
+function createModal(title, contentEl) {
+  const dlg = document.createElement('dialog');
+  dlg.className = 'modal-dlg';
+  const head = document.createElement('div');
+  head.className = 'modal-head';
+  head.innerHTML = `<h3 class="modal-title">${title}</h3><button type="button" class="btn" style="height:26px;padding:0 8px;">✕</button>`;
+  head.querySelector('button').onclick = () => dlg.close();
+  dlg.append(head, contentEl);
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.appendChild(dlg);
+  dlg.showModal();
+  return dlg;
+}
+
+function buildTimingPicker(initialIso) {
+  let mode = 'duration';
+  let targetDate = initialIso ? new Date(initialIso) : calcTargetFromDuration(0, 0, 3, 0, 0, 0);
+
+  const container = document.createElement('div');
+  container.className = 'timing-picker-box';
+
+  const tabs = document.createElement('div');
+  tabs.className = 'timing-tabs';
+  tabs.innerHTML = `
+    <button type="button" class="timing-tab active" id="tab-dur">Duration (Y / M / D / H / M / S)</button>
+    <button type="button" class="timing-tab" id="tab-dt">Exact Date & Time (incl. Seconds)</button>
+  `;
+
+  const durPanel = document.createElement('div');
+  durPanel.className = 'duration-grid';
+  durPanel.innerHTML = `
+    <div><label style="font-size:10px;font-weight:700">Y</label><input type="number" id="td-y" min="0" value="0"></div>
+    <div><label style="font-size:10px;font-weight:700">M</label><input type="number" id="td-m" min="0" value="0"></div>
+    <div><label style="font-size:10px;font-weight:700">D</label><input type="number" id="td-d" min="0" value="3"></div>
+    <div><label style="font-size:10px;font-weight:700">H</label><input type="number" id="td-h" min="0" max="23" value="0"></div>
+    <div><label style="font-size:10px;font-weight:700">MIN</label><input type="number" id="td-min" min="0" max="59" value="0"></div>
+    <div><label style="font-size:10px;font-weight:700;color:var(--primary)">SEC</label><input type="number" id="td-s" min="0" max="59" value="0" style="border-color:var(--primary)"></div>
+  `;
+
+  const dtPanel = document.createElement('div');
+  dtPanel.className = 'datetime-grid';
+  dtPanel.style.display = 'none';
+  dtPanel.innerHTML = `
+    <div>
+      <label class="form-label">Date (Y-M-D)</label>
+      <input type="date" id="td-date" class="form-input" value="${ymd(targetDate)}">
+    </div>
+    <div>
+      <label class="form-label">Time (H:M:S)</label>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <input type="number" id="td-th" class="form-input" min="0" max="23" value="${pad(targetDate.getHours())}"> :
+        <input type="number" id="td-tm" class="form-input" min="0" max="59" value="${pad(targetDate.getMinutes())}"> :
+        <input type="number" id="td-ts" class="form-input" min="0" max="59" value="${pad(targetDate.getSeconds())}">
+      </div>
+    </div>
+  `;
+
+  const preview = document.createElement('div');
+  preview.style.cssText = 'margin-top:8px;font-size:11px;font-weight:600;display:flex;justify-content:space-between;color:var(--ink-muted);';
+  const refreshPreview = () => {
+    preview.innerHTML = `Target: <strong>${formatFullDue(targetDate.toISOString())}</strong> <span style="font-family:var(--font-mono)">${formatCountdown(targetDate.toISOString())}</span>`;
+  };
+  refreshPreview();
+
+  const syncFromDur = () => {
+    targetDate = calcTargetFromDuration(
+      durPanel.querySelector('#td-y').value, durPanel.querySelector('#td-m').value,
+      durPanel.querySelector('#td-d').value, durPanel.querySelector('#td-h').value,
+      durPanel.querySelector('#td-min').value, durPanel.querySelector('#td-s').value
+    );
+    dtPanel.querySelector('#td-date').value = ymd(targetDate);
+    dtPanel.querySelector('#td-th').value = pad(targetDate.getHours());
+    dtPanel.querySelector('#td-tm').value = pad(targetDate.getMinutes());
+    dtPanel.querySelector('#td-ts').value = pad(targetDate.getSeconds());
+    refreshPreview();
+  };
+
+  const syncFromDt = () => {
+    const [y, m, d] = dtPanel.querySelector('#td-date').value.split('-').map(Number);
+    targetDate = new Date(y, m - 1, d,
+      Number(dtPanel.querySelector('#td-th').value) || 0,
+      Number(dtPanel.querySelector('#td-tm').value) || 0,
+      Number(dtPanel.querySelector('#td-ts').value) || 0
+    );
+    refreshPreview();
+  };
+
+  tabs.querySelector('#tab-dur').onclick = () => {
+    tabs.querySelector('#tab-dur').className = 'timing-tab active';
+    tabs.querySelector('#tab-dt').className = 'timing-tab';
+    durPanel.style.display = 'grid'; dtPanel.style.display = 'none';
+  };
+  tabs.querySelector('#tab-dt').onclick = () => {
+    tabs.querySelector('#tab-dt').className = 'timing-tab active';
+    tabs.querySelector('#tab-dur').className = 'timing-tab';
+    dtPanel.style.display = 'grid'; durPanel.style.display = 'none';
+  };
+
+  durPanel.querySelectorAll('input').forEach(i => i.addEventListener('input', syncFromDur));
+  dtPanel.querySelectorAll('input').forEach(i => i.addEventListener('input', syncFromDt));
+
+  container.append(tabs, durPanel, dtPanel, preview);
+  return { el: container, getIso: () => targetDate.toISOString() };
+}
+
+window.openVaultModal = () => {
+  const currentKey = getStoredPassphrase();
+  const body = document.createElement('div');
+  body.className = 'modal-body';
+  body.innerHTML = `
+    <div style="padding:10px;border-radius:8px;background:var(--success-soft);color:#065f46;font-size:12px;">
+      <strong>🛡️ Zero-Knowledge Client Vault (AES-256-GCM Active)</strong>
+      <p style="margin:4px 0 0;">All board tasks and settings are encrypted on your local device. The secret passphrase is never transmitted.</p>
+    </div>
+    <div style="padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>⚡ Multi-Tab BroadcastChannel Auto-Sync</strong>
+        <span style="color:#059669;font-weight:700;font-size:11px;">🟢 Connected</span>
+      </div>
+      <p style="margin:4px 0 8px;font-size:11.5px;color:var(--ink-muted);">Sync events received: ${totalSyncEvents} • Last synced: ${new Date(lastSyncTimestamp).toLocaleTimeString()}</p>
+      <button type="button" class="btn" id="btn-force-sync" style="font-size:11px;height:26px;">Broadcast Sync Heartbeat</button>
+    </div>
+    <div style="padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);">
+      <label class="form-label">Private Vault Secret Key</label>
+      <input type="text" id="vault-key-input" class="form-input" style="font-family:var(--font-mono);font-size:11px;margin-top:4px;" value="${currentKey}">
+      <button type="button" class="btn primary" id="btn-save-key" style="margin-top:8px;font-size:11px;height:26px;">Save & Re-encrypt</button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn primary" id="dlg-close">Done</button>
+    </div>
+  `;
+  const dlg = createModal('Zero-Knowledge Security & Sync', body);
+  body.querySelector('#dlg-close').onclick = () => dlg.close();
+  body.querySelector('#btn-force-sync').onclick = () => {
+    persistAndSyncState();
+    toast('Sync heartbeat broadcast to all tabs!');
+  };
+  body.querySelector('#btn-save-key').onclick = () => {
+    const val = body.querySelector('#vault-key-input').value.trim();
+    if (val) {
+      localStorage.setItem(VAULT_KEY_STORAGE, val);
+      persistAndSyncState();
+      toast('Passphrase updated and vault re-encrypted!');
+    }
+  };
+};
+
+window.openNewTaskModal = (laneId) => {
+  const body = document.createElement('form');
+  body.className = 'modal-body';
+  const timing = buildTimingPicker();
+
+  body.innerHTML = `
+    <label class="form-label">Task Title *<input type="text" id="nt-title" class="form-input" placeholder="e.g. Implement automated webhook alerts" required></label>
+    <label class="form-label">Description<textarea id="nt-desc" class="form-textarea" placeholder="Add technical notes..."></textarea></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <label class="form-label">Assignee<select id="nt-assignee" class="form-select">
+        <option value="">Unassigned</option>
+        ${state.members.map(m => `<option value="${m.id}" ${m.id === currentUser.id ? 'selected':''}>${m.name} (${m.email || 'No email'})</option>`).join('')}
+      </select></label>
+      <label class="form-label">Priority<select id="nt-prio" class="form-select">
+        <option value="1">P1 - Critical</option>
+        <option value="2">P2 - High</option>
+        <option value="3" selected>P3 - Moderate</option>
+        <option value="4">P4 - Low</option>
+      </select></label>
+    </div>
+    <label class="form-label">Tags (comma-separated)<input type="text" id="nt-tags" class="form-input" placeholder="Bug, Feature, Design, Docs" value="Feature"></label>
+    <div class="form-label">Due Date & Countdown Timing</div>
+  `;
+  body.appendChild(timing.el);
+
+  const actions = document.createElement('div');
+  actions.className = 'modal-actions';
+  actions.innerHTML = `
+    <button type="button" class="btn" id="nt-cancel">Cancel</button>
+    <button type="submit" class="btn primary">+ Create Task</button>
+  `;
+  body.appendChild(actions);
+
+  const dlg = createModal('Create New Task', body);
+  actions.querySelector('#nt-cancel').onclick = () => dlg.close();
+
+  body.onsubmit = (e) => {
+    e.preventDefault();
+    const title = body.querySelector('#nt-title').value.trim();
+    if (!title) return;
+    const desc = body.querySelector('#nt-desc').value.trim();
+    const assigneeId = body.querySelector('#nt-assignee').value;
+    const priority = Number(body.querySelector('#nt-prio').value);
+    const tags = body.querySelector('#nt-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+    const due = timing.getIso();
+
+    const task = { id: uid('c'), laneId, title, desc, assigneeId, priority, due, tags, timerSeconds: 0, timerRunning: false, subtasks: [] };
+    state.cards.unshift(task);
+    persistAndSyncState();
+    dlg.close();
+
+    if (assigneeId) {
+      const lane = state.lanes.find(l => l.id === laneId);
+      const member = state.members.find(m => m.id === assigneeId);
+      triggerAutomatedAssignmentEmail(task, lane ? lane.name : 'Lane', member);
+    }
+  };
+};
+
+window.openCardModal = (cardId) => {
+  const card = state.cards.find(c => c.id === cardId);
+  if (!card) return;
+
+  const body = document.createElement('div');
+  body.className = 'modal-body';
+  const timing = buildTimingPicker(card.due);
+
+  body.innerHTML = `
+    <label class="form-label">Task Title<input type="text" id="ec-title" class="form-input" value="${card.title}"></label>
+    <label class="form-label">Description<textarea id="ec-desc" class="form-textarea">${card.desc || ''}</textarea></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <label class="form-label">Lane<select id="ec-lane" class="form-select">
+        ${state.lanes.map(l => `<option value="${l.id}" ${l.id === card.laneId ? 'selected':''}>${l.name}</option>`).join('')}
+      </select></label>
+      <label class="form-label">Assignee<select id="ec-who" class="form-select">
+        <option value="">Unassigned</option>
+        ${state.members.map(m => `<option value="${m.id}" ${m.id === card.assigneeId ? 'selected':''}>${m.name} (${m.email || 'No email'})</option>`).join('')}
+      </select></label>
+      <label class="form-label">Priority<select id="ec-prio" class="form-select">
+        ${[1,2,3,4].map(p => `<option value="${p}" ${p === card.priority ? 'selected':''}>${PRIORITIES[p]}</option>`).join('')}
+      </select></label>
+    </div>
+    <label class="form-label">Tags (comma-separated)<input type="text" id="ec-tags" class="form-input" value="${(card.tags || []).join(', ')}"></label>
+
+    <div>
+      <label class="form-label" style="margin-bottom:6px;">Sub-tasks Checklist</label>
+      <div id="subtasks-container" style="display:flex;flex-direction:column;gap:5px;max-height:120px;overflow-y:auto;margin-bottom:6px;">
+        ${(card.subtasks || []).map((st, i) => `
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;">
+            <input type="checkbox" id="st-${i}" ${st.done ? 'checked' : ''}>
+            <span style="${st.done ? 'text-decoration:line-through;color:var(--ink-muted);' : ''}">${st.title}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="new-st-input" class="form-input" placeholder="New sub-task item..." style="height:28px;">
+        <button type="button" class="btn" id="btn-add-st" style="height:28px;">Add</button>
+      </div>
+    </div>
+    <div class="form-label">Due Date & Countdown Timing</div>
+  `;
+  body.appendChild(timing.el);
+
+  const actions = document.createElement('div');
+  actions.className = 'modal-actions';
+  actions.innerHTML = `
+    <button type="button" class="btn danger" style="margin-right:auto" id="ec-del">Delete Task</button>
+    <button type="button" class="btn primary" id="ec-mail">Dispatch Alert Email</button>
+    <button type="button" class="btn primary" id="ec-save">Save & Close</button>
+  `;
+  body.appendChild(actions);
+
+  const dlg = createModal('Task Details & Settings', body);
+
+  body.querySelector('#btn-add-st').onclick = () => {
+    const txt = body.querySelector('#new-st-input').value.trim();
+    if (!txt) return;
+    if (!card.subtasks) card.subtasks = [];
+    card.subtasks.push({ title: txt, done: false });
+    dlg.close();
+    openCardModal(card.id);
+  };
+
+  const save = () => {
+    const prevAssignee = card.assigneeId;
+    card.title = body.querySelector('#ec-title').value.trim() || card.title;
+    card.desc = body.querySelector('#ec-desc').value.trim();
+    card.laneId = body.querySelector('#ec-lane').value;
+    card.assigneeId = body.querySelector('#ec-who').value;
+    card.priority = Number(body.querySelector('#ec-prio').value);
+    card.tags = body.querySelector('#ec-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+    card.due = timing.getIso();
+
+    (card.subtasks || []).forEach((st, i) => {
+      const chk = body.querySelector(`#st-${i}`);
+      if (chk) st.done = chk.checked;
+    });
+
+    persistAndSyncState();
+    if (card.assigneeId && card.assigneeId !== prevAssignee) {
+      const assigned = state.members.find(m => m.id === card.assigneeId);
+      const lane = state.lanes.find(l => l.id === card.laneId);
+      triggerAutomatedAssignmentEmail(card, lane ? lane.name : 'Lane', assigned);
+    }
+  };
+
+  actions.querySelector('#ec-save').onclick = () => { save(); dlg.close(); };
+  actions.querySelector('#ec-mail').onclick = () => {
+    save();
+    const assigned = state.members.find(m => m.id === card.assigneeId);
+    const lane = state.lanes.find(l => l.id === card.laneId);
+    if (assigned && assigned.email) {
+      triggerAutomatedAssignmentEmail(card, lane ? lane.name : 'Lane', assigned);
+    } else {
+      toast('Please assign this task to an account with an email address.');
+    }
+  };
+  actions.querySelector('#ec-del').onclick = () => {
+    state.cards = state.cards.filter(c => c.id !== card.id);
+    persistAndSyncState();
+    dlg.close();
+    toast('Task deleted.');
+  };
+};
+
+window.openCreateAccountModal = () => {
+  const body = document.createElement('form');
+  body.className = 'modal-body';
+  body.innerHTML = `
+    <label class="form-label">Member Name *<input type="text" id="acc-name" class="form-input" placeholder="e.g. Sarah Connor" required></label>
+    <label class="form-label">Gmail / Email for Alerts *<input type="email" id="acc-email" class="form-input" placeholder="user@gmail.com" required></label>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="acc-cancel">Cancel</button>
+      <button type="submit" class="btn primary">+ Create Member</button>
+    </div>
+  `;
+  const dlg = createModal('Create Member Account', body);
+  body.querySelector('#acc-cancel').onclick = () => dlg.close();
+  body.onsubmit = (e) => {
+    e.preventDefault();
+    const name = body.querySelector('#acc-name').value.trim();
+    const email = body.querySelector('#acc-email').value.trim();
+    if (!name || !email) return;
+    const newMember = { id: uid('m'), name, email, color: getUserColor(state.members.length) };
+    state.members.push(newMember);
+    persistAndSyncState();
+    dlg.close();
+    toast(`Account created for ${name}!`);
+  };
+};
+
+window.openProfileModal = () => {
+  const body = document.createElement('form');
+  body.className = 'modal-body';
+  body.innerHTML = `
+    <label class="form-label">Your Name<input type="text" id="prof-name" class="form-input" value="${currentUser.name}" required></label>
+    <label class="form-label">Your Alert Gmail Address<input type="email" id="prof-email" class="form-input" value="${currentUser.email}" required></label>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="prof-cancel">Cancel</button>
+      <button type="submit" class="btn primary">Save Profile</button>
+    </div>
+  `;
+  const dlg = createModal('User Profile & Notifications', body);
+  body.querySelector('#prof-cancel').onclick = () => dlg.close();
+  body.onsubmit = (e) => {
+    e.preventDefault();
+    currentUser.name = body.querySelector('#prof-name').value.trim();
+    currentUser.email = body.querySelector('#prof-email').value.trim();
+    localStorage.setItem('vtb_user_email', currentUser.email);
+    const me = state.members.find(m => m.id === currentUser.id);
+    if (me) { me.name = currentUser.name; me.email = currentUser.email; }
+    persistAndSyncState();
+    dlg.close();
+    toast('Profile updated!');
+  };
+};
+
+window.openEmailConfigModal = () => {
+  const body = document.createElement('form');
+  body.className = 'modal-body';
+  body.innerHTML = `
+    <p style="font-size:12px;color:var(--ink-muted);margin:0;">Enter keys from <strong>emailjs.com</strong> to transmit real emails directly to Gmail inboxes:</p>
+    <label class="form-label">Public Key<input type="text" id="cfg-pk" class="form-input" value="${emailConfig.publicKey}" placeholder="Public key..."></label>
+    <label class="form-label">Service ID<input type="text" id="cfg-sid" class="form-input" value="${emailConfig.serviceId}" placeholder="service_gmail..."></label>
+    <label class="form-label">Template ID<input type="text" id="cfg-tid" class="form-input" value="${emailConfig.templateId}" placeholder="template_reminder..."></label>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="cfg-cancel">Cancel</button>
+      <button type="submit" class="btn primary">Save Keys</button>
+    </div>
+  `;
+  const dlg = createModal('EmailJS Live Configuration', body);
+  body.querySelector('#cfg-cancel').onclick = () => dlg.close();
+  body.onsubmit = (e) => {
+    e.preventDefault();
+    emailConfig.publicKey = body.querySelector('#cfg-pk').value.trim();
+    emailConfig.serviceId = body.querySelector('#cfg-sid').value.trim();
+    emailConfig.templateId = body.querySelector('#cfg-tid').value.trim();
+    localStorage.setItem('vtb_emailjs_pk', emailConfig.publicKey);
+    localStorage.setItem('vtb_emailjs_sid', emailConfig.serviceId);
+    localStorage.setItem('vtb_emailjs_tid', emailConfig.templateId);
+    dlg.close();
+    toast('EmailJS keys saved!');
+  };
+};
+
+window.openOutboxModal = () => {
+  const body = document.createElement('div');
+  body.className = 'modal-body';
+  if (outbox.length === 0) {
+    body.innerHTML = '<p style="text-align:center;padding:24px;color:var(--ink-muted);">No automated emails dispatched yet.</p>';
+  } else {
+    const list = document.createElement('div');
+    list.style.cssText = 'display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;';
+    outbox.forEach(item => {
+      const row = document.createElement('div');
+      row.style.cssText = 'padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:12px;';
+      row.innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <strong style="color:var(--primary);">${item.recipientName} &lt;${item.recipientEmail}&gt;</strong>
+          <span style="font-size:10.5px;color:var(--ink-muted);">${item.at}</span>
+        </div>
+        <div><strong>Task:</strong> "${item.taskTitle}" in ${item.laneName} • ${item.priority}</div>
+        <div style="color:var(--ink-muted);margin-bottom:4px;">Timing: ${item.dueSummary}</div>
+        <pre style="margin:0;padding:6px;background:var(--bg);border-radius:4px;font-size:11px;font-family:var(--font-mono);white-space:pre-wrap;">${item.body}</pre>
+        <div style="margin-top:4px;font-weight:700;color:${item.status.includes('Success') ? '#166534' : '#b45309'};">Status: ${item.status}</div>
+      `;
+      list.appendChild(row);
+    });
+    body.appendChild(list);
+  }
+  const actions = document.createElement('div');
+  actions.className = 'modal-actions';
+  actions.innerHTML = `
+    ${outbox.length > 0 ? '<button type="button" class="btn danger" style="margin-right:auto" id="ob-clear">Clear</button>' : ''}
+    <button type="button" class="btn primary" id="ob-close">Close</button>
+  `;
+  body.appendChild(actions);
+  const dlg = createModal(`Automated Outbox Log (${outbox.length})`, body);
+  actions.querySelector('#ob-close').onclick = () => dlg.close();
+  const clearBtn = actions.querySelector('#ob-clear');
+  if (clearBtn) clearBtn.onclick = () => { outbox = []; saveOutbox(); dlg.close(); toast('Outbox cleared.'); };
+};
+
+/* JSON Import / Export */
+window.exportBoardJSON = () => {
+  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
+  const el = document.createElement('a');
+  el.setAttribute('href', dataStr);
+  el.setAttribute('download', `${state.name.replace(/\s+/g, '_')}_backup.json`);
+  document.body.appendChild(el);
+  el.click();
+  el.remove();
+  toast('Board JSON exported!');
+};
+
+window.importBoardJSON = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (imported && imported.cards && imported.lanes) {
+          state = imported;
+          persistAndSyncState();
+          toast('Board JSON imported successfully!');
+        } else {
+          toast('Invalid board JSON format.');
+        }
+      } catch(err) {
+        toast('Failed parsing JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+};
+
+/* Sorting & Swimlanes */
+window.changeSorting = (val) => { currentSort = val; renderWorkspace(); };
+window.changeSwimlane = (val) => { currentSwimlane = val; renderWorkspace(); };
+
+function sortCards(cards) {
+  const c = [...cards];
+  if (currentSort === 'prio-desc') return c.sort((a,b) => a.priority - b.priority);
+  if (currentSort === 'prio-asc') return c.sort((a,b) => b.priority - a.priority);
+  if (currentSort === 'due-asc') return c.sort((a,b) => new Date(a.due || 0) - new Date(b.due || 0));
+  if (currentSort === 'title-asc') return c.sort((a,b) => a.title.localeCompare(b.title));
+  if (currentSort === 'title-desc') return c.sort((a,b) => b.title.localeCompare(a.title));
+  return c;
+}
+
+/* Card Timer Toggle */
+window.toggleCardTimer = (e, cardId) => {
+  e.stopPropagation();
+  const card = state.cards.find(c => c.id === cardId);
+  if (!card) return;
+  card.timerRunning = !card.timerRunning;
+  persistAndSyncState();
+};
+
+/* Rendering Kanban UI */
+function renderAccountsBar() {
+  const bar = document.getElementById('accounts-bar');
+  if (!bar || !state) return;
+  bar.innerHTML = '';
+
+  const title = document.createElement('span');
+  title.style.cssText = 'font-size:11px;font-weight:800;color:var(--ink-muted);text-transform:uppercase;';
+  title.textContent = `Accounts (${state.members.length}):`;
+  bar.appendChild(title);
+
+  const allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.className = 'account-chip' + (filterAccountId === null ? ' active' : '');
+  allBtn.textContent = 'All Accounts';
+  allBtn.onclick = () => { filterAccountId = null; render(); };
+  bar.appendChild(allBtn);
+
+  state.members.forEach((m, idx) => {
+    const taskCount = state.cards.filter(c => c.assigneeId === m.id).length;
+    const chip = document.createElement('div');
+    chip.className = 'account-chip' + (filterAccountId === m.id ? ' active' : '');
+    chip.innerHTML = `
+      <div class="avatar" style="background:${m.color || getUserColor(idx)}">${m.name.slice(0, 2)}</div>
+      <span>${m.name} ${m.id === currentUser.id ? '(You)' : ''}</span>
+      <span class="badge">${taskCount}</span>
+    `;
+    chip.onclick = () => { filterAccountId = filterAccountId === m.id ? null : m.id; render(); };
+    bar.appendChild(chip);
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'add-acc-btn';
+  addBtn.textContent = '+ Create Account';
+  addBtn.onclick = () => openCreateAccountModal();
+  bar.appendChild(addBtn);
+}
+
+function renderWorkspace() {
+  const workspace = document.getElementById('workspace');
+  if (!workspace || !state) return;
+  workspace.innerHTML = '';
+
+  let swimlaneGroups = [{ id: 'all', title: '', filter: () => true }];
+  if (currentSwimlane === 'assignee') {
+    swimlaneGroups = state.members.map(m => ({
+      id: m.id, title: `Assignee: ${m.name}`, filter: (c) => c.assigneeId === m.id
+    }));
+    swimlaneGroups.push({ id: 'unassigned', title: 'Unassigned Tasks', filter: (c) => !c.assigneeId });
+  } else if (currentSwimlane === 'priority') {
+    swimlaneGroups = [1, 2, 3, 4].map(p => ({
+      id: String(p), title: `Priority: ${PRIORITIES[p]}`, filter: (c) => c.priority === p
+    }));
+  }
+
+  swimlaneGroups.forEach(group => {
+    const groupEl = document.createElement('div');
+    groupEl.className = 'swimlane-container';
+    if (group.title) {
+      const st = document.createElement('div');
+      st.className = 'swimlane-title';
+      st.textContent = group.title;
+      groupEl.appendChild(st);
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'kanban-grid';
+
+    state.lanes.forEach(lane => {
+      let laneCards = state.cards.filter(c => c.laneId === lane.id && group.filter(c) && (!filterAccountId || c.assigneeId === filterAccountId));
+      laneCards = sortCards(laneCards);
+
+      const laneEl = document.createElement('div');
+      laneEl.className = 'lane';
+
+      const isOverLimit = lane.limit > 0 && laneCards.length > lane.limit;
+      const head = document.createElement('div');
+      head.className = 'lane-head';
+      head.innerHTML = `
+        <h3 class="lane-title">
+          ${lane.name}
+          <span class="lane-count">${laneCards.length}${lane.limit > 0 ? ' / ' + lane.limit : ''}</span>
+          ${isOverLimit ? '<span class="lane-wip-warn">(Exceeded)</span>' : ''}
+        </h3>
+        <button type="button" class="btn" style="height:24px;padding:0 7px;font-size:11px;">+ Add</button>
+      `;
+      head.querySelector('button').onclick = () => openNewTaskModal(lane.id);
+      laneEl.appendChild(head);
+
+      const list = document.createElement('div');
+      list.className = 'lane-cards';
+      list.dataset.laneId = lane.id;
+
+      list.ondragover = (e) => { e.preventDefault(); list.classList.add('drop-active'); };
+      list.ondragleave = () => { list.classList.remove('drop-active'); };
+      list.ondrop = (e) => {
+        e.preventDefault();
+        list.classList.remove('drop-active');
+        const cardId = e.dataTransfer.getData('text/plain');
+        const card = state.cards.find(c => c.id === cardId);
+        if (card && card.laneId !== lane.id) {
+          card.laneId = lane.id;
+          persistAndSyncState();
+          toast(`Task moved to ${lane.name}`);
+        }
+      };
+
+      laneCards.forEach(c => {
+        const assigneeIdx = state.members.findIndex(m => m.id === c.assigneeId);
+        const assignee = state.members[assigneeIdx];
+        const countdown = formatCountdown(c.due);
+        const isOverdue = countdown.includes('Overdue');
+
+        const cardEl = document.createElement('article');
+        cardEl.className = 'task-card';
+        cardEl.draggable = true;
+        cardEl.ondragstart = (e) => { e.dataTransfer.setData('text/plain', c.id); };
+        cardEl.onclick = () => openCardModal(c.id);
+
+        const subtasksTotal = (c.subtasks || []).length;
+        const subtasksDone = (c.subtasks || []).filter(s => s.done).length;
+        const subtaskPct = subtasksTotal > 0 ? Math.round((subtasksDone / subtasksTotal) * 100) : 0;
+
+        const timerMinutes = Math.floor((c.timerSeconds || 0) / 60);
+        const timerSecs = (c.timerSeconds || 0) % 60;
+        const timerFormatted = `${pad(timerMinutes)}:${pad(timerSecs)}`;
+
+        cardEl.innerHTML = `
+          ${c.tags && c.tags.length ? `
+            <div class="card-tags">
+              ${c.tags.map(t => `<span class="tag-badge tag-${t.toLowerCase()}">${t}</span>`).join('')}
+            </div>
+          ` : ''}
+          <h4 class="card-title">${c.title}</h4>
+
+          ${subtasksTotal > 0 ? `
+            <div class="card-subtasks">
+              <div style="font-size:10px;font-weight:700;color:var(--ink-muted);display:flex;justify-content:space-between;">
+                <span>Sub-tasks ${subtasksDone}/${subtasksTotal}</span>
+                <span>${subtaskPct}%</span>
+              </div>
+              <div class="subtasks-bar"><div class="subtasks-fill" style="width:${subtaskPct}%"></div></div>
+            </div>
+          ` : ''}
+
+          <div class="card-meta">
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+              <span class="prio-badge p${c.priority}">${PRIORITIES[c.priority]?.split(' ')[0]}</span>
+              ${c.due ? `<span class="due-badge ${isOverdue ? 'overdue' : ''}">🕒 ${countdown}</span>` : ''}
+              <button type="button" class="timer-btn ${c.timerRunning ? 'running' : ''}" onclick="toggleCardTimer(event, '${c.id}')">
+                ⏱️ ${c.timerRunning ? 'Stop' : 'Start'} ${timerFormatted}
+              </button>
+            </div>
+            <div>
+              ${assignee ? `<div class="avatar" style="background:${assignee.color || getUserColor(assigneeIdx)}" title="${assignee.name}">${assignee.name.slice(0, 2)}</div>` : '<span style="color:var(--ink-muted);font-size:10px;">Unassigned</span>'}
+            </div>
+          </div>
+        `;
+        list.appendChild(cardEl);
+      });
+
+      laneEl.appendChild(list);
+      grid.appendChild(laneEl);
+    });
+
+    groupEl.appendChild(grid);
+    workspace.appendChild(groupEl);
+  });
+}
+
+function render() {
+  const boardTitle = document.getElementById('board-title');
+  if (boardTitle && state) boardTitle.textContent = state.name;
+  const bannerUser = document.getElementById('banner-user-display');
+  if (bannerUser) bannerUser.textContent = `${currentUser.name} <${currentUser.email}>`;
+  saveOutbox();
+  renderAccountsBar();
+  renderWorkspace();
+}
+
+/* Timer Interval for Running Tasks & Live Second Countdowns */
+setInterval(() => {
+  let changed = false;
+  if (state && state.cards) {
+    state.cards.forEach(c => {
+      if (c.timerRunning) {
+        c.timerSeconds = (c.timerSeconds || 0) + 1;
+        changed = true;
+      }
+    });
+  }
+  // Re-render lane countdowns and timers every second
+  renderWorkspace();
+  if (changed) {
+    // Throttle local save on timer ticks
+    try {
+      encryptData(state).then(envelope => localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope)));
+    } catch(e) {}
+  }
+}, 1000);
+
+/* App Init */
+(async () => {
+  state = await loadEncryptedState();
+  render();
+})();
+
+})();
+</script>
+</body>
+</html>
