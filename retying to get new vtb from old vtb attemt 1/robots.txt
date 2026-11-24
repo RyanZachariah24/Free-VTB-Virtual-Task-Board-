@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://freevtbvirtualtaskboard.vercel.app/sitemap.xml

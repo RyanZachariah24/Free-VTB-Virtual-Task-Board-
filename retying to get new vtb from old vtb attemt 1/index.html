@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Vtb Virtual Task Board</title>
+    <link rel="canonical" href="https://freevtbvirtualtaskboard.vercel.app/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="google-site-verification" content="NviluV0nmrhJBwljZWtOwUdnwqTnHCLE7cpTGHvSxus" />
+    <meta name="description" content="Free Vtb Virtual Task Board - Real-time collaborative visual Kanban task boards with zero-knowledge AES-256-GCM encryption, shared boards, and notifications." />
+    <meta name="keywords" content="freevtbvirtualtaskboard, Free Vtb Virtual Task Board, virtual task board, free kanban board, visual task board" />
+    <meta property="og:title" content="Free Vtb Virtual Task Board" />
+    <meta property="og:description" content="Collaborative visual Kanban task boards with zero-knowledge AES-256-GCM encryption and real-time multi-device sync." />
+    <meta property="og:url" content="https://freevtbvirtualtaskboard.vercel.app/" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#2563EB" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Free Vtb Virtual Task Board" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
+
+    <!-- Parallel DNS/TLS handshakes for Firebase & Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
+
+    <!-- Preload critical CSS + JS modules in parallel -->
+    <link rel="preload" as="style" href="/assets/index-de5m5r5k.css" />
+    <link rel="preload" as="style" href="/liquidGlass.css?v=9" />
+    <link rel="modulepreload" crossorigin href="/assets/index-b49n99ti.js" />
+    <link rel="modulepreload" href="/vtb-cloud-engine.js?v=9" />
+    <link rel="modulepreload" href="/vtb-pro-enhancer.js?v=9" />
+
+    <link rel="stylesheet" crossorigin href="/assets/index-de5m5r5k.css" />
+    <link rel="stylesheet" href="/liquidGlass.css?v=9" />
+
+    <!-- Non-blocking Google Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      />
+    </noscript>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/sw.js", { scope: "/" })
+            .catch(function (err) {
+              console.warn("[VTB SW] Registration failed:", err);
+            });
+        });
+      }
+
+      // Synchronous localStorage hook buffers early writes before cloud engine finishes loading
+      (function () {
+        const origSet = localStorage.setItem.bind(localStorage);
+        window.__vtbOrigSetItem = origSet;
+        window.__vtbPendingWrites = [];
+        localStorage.setItem = function (k, v) {
+          origSet(k, v);
+          try {
+            if (typeof window.__vtbOnLocalWrite === "function") {
+              window.__vtbOnLocalWrite(k, v);
+            } else {
+              const idx = window.__vtbPendingWrites.findIndex(function (item) {
+                return item[0] === k;
+              });
+              if (idx >= 0) window.__vtbPendingWrites[idx] = [k, v];
+              else window.__vtbPendingWrites.push([k, v]);
+            }
+          } catch (err) {
+            console.warn("[VTB Sync Hook] Non-fatal error:", err);
+          }
+        };
+
+        // Global early snooze checker
+        window.__vtbIsSnoozed = function () {
+          try {
+            var u = Number(localStorage.getItem("vtb_pro_v8_ask_in_until") || 0);
+            return u > 0 && Date.now() < u;
+          } catch (e) {
+            return false;
+          }
+        };
+      })();
+    </script>
+
+    <!-- Main React app runs FIRST so all buttons appear instantly; cloud engine & pro enhancer load async in parallel -->
+    <script type="module" crossorigin src="/assets/index-b49n99ti.js"></script>
+    <script type="module" async src="/vtb-cloud-engine.js?v=9"></script>
+    <script type="module" async src="/vtb-pro-enhancer.js?v=9"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

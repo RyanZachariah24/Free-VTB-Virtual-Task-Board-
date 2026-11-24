@@ -1,0 +1,618 @@
+/* ==========================================================================
+   PURE SOLID FULL BLUE BACKDROP (#2563EB - NO GRADIENT) + APPLE LIQUID GLASS ON TOP
+   ========================================================================== */
+:root {
+  --board-bg-color: #2563EB;
+  --board-bg-image: none;
+  --app-bg: #2563EB;
+
+  --glass-tint-rgb: 255, 255, 255;
+  --glass-bar-opacity: 0.20;
+  --glass-lane-opacity: 0.24;
+  --glass-card-opacity: 0.86;
+  --glass-modal-opacity: 0.92;
+  --glass-blur: 28px;
+  --glass-saturate: 195%;
+
+  --accent-color: #2563EB;
+  --accent-text: #ffffff;
+  --surface-text: #ffffff;
+  --card-text: #0f172a;
+  --card-text-secondary: #334155;
+
+  --glass-border: rgba(255, 255, 255, 0.54);
+  --glass-card-border: rgba(255, 255, 255, 0.85);
+  --glass-specular: inset 0 1px 1px rgba(255, 255, 255, 0.88), inset 0 -1px 1px rgba(255, 255, 255, 0.20);
+  --glass-shadow: 0 14px 34px rgba(10, 28, 78, 0.28), 0 3px 10px rgba(10, 28, 78, 0.16);
+}
+
+[data-glass-mode="dark"] {
+  --glass-tint-rgb: 15, 23, 42;
+  --glass-bar-opacity: 0.48;
+  --glass-lane-opacity: 0.52;
+  --glass-card-opacity: 0.80;
+  --glass-modal-opacity: 0.90;
+  --surface-text: #f8fafc;
+  --card-text: #f8fafc;
+  --card-text-secondary: #cbd5e1;
+  --glass-border: rgba(255, 255, 255, 0.28);
+  --glass-card-border: rgba(255, 255, 255, 0.34);
+}
+
+/* 1. Pure Solid Full Blue Background (#2563EB - NO Gradient) */
+html, body, #root {
+  min-height: 100dvh;
+  background-color: #2563EB !important;
+  background-image: none !important;
+  background: #2563EB !important;
+}
+
+/* Make opaque Tailwind wrappers transparent so pure solid blue shows behind */
+#root > div,
+main,
+main.workspace,
+.bg-\[\#F0F2F5\],
+.bg-\[\#F8F9FB\],
+.bg-\[\#F8FAFC\],
+.bg-\[\#EBEEF2\]\/70 {
+  background-color: transparent !important;
+  background-image: none !important;
+  background: transparent !important;
+}
+
+/* Universal Apple Liquid Glass Buttons (For blue canvas, headers, bars) */
+button,
+.btn,
+.banner-btn,
+.account-chip,
+.timer-btn,
+.vtb-glass-pill-btn,
+.st-b {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(18px) saturate(190%);
+  -webkit-backdrop-filter: blur(18px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-top: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(0, 0, 0, 0.12);
+  color: #FFFFFF;
+  font-weight: 700;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* HIGH-CONTRAST OVERRIDE: Ensure buttons inside modals, dialogs, cards, popovers, and light surfaces are crisp and readable */
+dialog button,
+[role="dialog"] button,
+.modal-dlg button,
+.vtb-modal-box button,
+.vtb-pro-dialog button,
+.task-card button,
+.bg-white button,
+.bg-slate-50 button,
+.bg-slate-100 button,
+.bg-gray-50 button,
+.bg-gray-100 button,
+[data-vtb-sleep-enhanced] button,
+[data-radix-popper-content-wrapper] button,
+[data-radix-menu-content] button,
+#vtb-settings-dropdown button {
+  color: #0f172a;
+  text-shadow: none !important;
+}
+
+/* Preserve white text for primary and dark buttons inside modals/cards */
+dialog button.primary,
+dialog button[class*="bg-blue"],
+dialog button[class*="bg-indigo"],
+dialog button[class*="bg-slate-9"],
+dialog button[class*="bg-gray-9"],
+dialog button[class*="bg-black"],
+dialog button[class*="bg-red"],
+dialog button[class*="bg-emerald"],
+dialog button[class*="bg-green"],
+dialog button[class*="bg-purple"],
+[role="dialog"] button.primary,
+[role="dialog"] button[class*="bg-blue"],
+[role="dialog"] button[class*="bg-indigo"],
+[role="dialog"] button[class*="bg-slate-9"],
+[role="dialog"] button[class*="bg-gray-9"],
+[role="dialog"] button[class*="bg-black"],
+[role="dialog"] button[class*="bg-red"],
+[role="dialog"] button[class*="bg-emerald"],
+[role="dialog"] button[class*="bg-green"],
+[role="dialog"] button[class*="bg-purple"],
+.vtb-modal-box button.primary,
+.vtb-modal-box button[class*="bg-blue"],
+.vtb-modal-box button[class*="bg-indigo"],
+.vtb-modal-box button[class*="bg-slate-9"],
+.vtb-modal-box button[class*="bg-gray-9"],
+.vtb-modal-box button[class*="bg-black"],
+.vtb-modal-box button[class*="bg-red"],
+.vtb-modal-box button[class*="bg-emerald"],
+.vtb-modal-box button[class*="bg-green"],
+.vtb-modal-box button[class*="bg-purple"],
+.vtb-pro-dialog button.primary,
+.vtb-pro-dialog button[class*="bg-blue"],
+.vtb-pro-dialog button[class*="bg-indigo"],
+.vtb-pro-dialog button[class*="bg-slate-9"],
+.vtb-pro-dialog button[class*="bg-gray-9"],
+.vtb-pro-dialog button[class*="bg-black"],
+.vtb-pro-dialog button[class*="bg-red"],
+.vtb-pro-dialog button[class*="bg-emerald"],
+.vtb-pro-dialog button[class*="bg-green"],
+.vtb-pro-dialog button[class*="bg-purple"],
+.task-card button[class*="bg-blue"],
+.task-card button[class*="bg-indigo"],
+.task-card button[class*="bg-black"],
+.task-card button[class*="bg-red"],
+[data-vtb-sleep-enhanced] button.primary,
+[data-vtb-sleep-enhanced] button[class*="bg-blue"],
+[data-vtb-sleep-enhanced] button[class*="bg-indigo"],
+[data-vtb-sleep-enhanced] button[class*="bg-black"] {
+  color: #ffffff !important;
+}
+
+/* Preserve Tailwind text colors on all buttons */
+button[class*="text-slate-"],
+button[class*="text-gray-"],
+button[class*="text-blue-"],
+button[class*="text-indigo-"],
+button[class*="text-purple-"],
+button[class*="text-red-"],
+button[class*="text-green-"],
+button[class*="text-emerald-"],
+button[class*="text-amber-"],
+button[class*="text-yellow-"],
+button[class*="text-zinc-"],
+button[class*="text-neutral-"],
+button.text-black,
+button.text-white {
+  color: inherit;
+}
+
+/* Glass surface bars: set white color so buttons inherit correctly */
+header,
+header.app-nav,
+nav,
+nav.accounts-bar,
+.top-banner,
+.vtb-glass-hub-bar {
+  color: #ffffff;
+}
+
+button:hover,
+.btn:hover,
+.banner-btn:hover,
+.account-chip:hover,
+.timer-btn:hover,
+.vtb-glass-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.36);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+button:active,
+.btn:active,
+.vtb-glass-pill-btn:active {
+  transform: scale(0.96);
+}
+
+/* Primary Liquid Glass Action Button */
+button.primary,
+.btn.primary {
+  background: rgba(37, 99, 235, 0.85) !important;
+  border-color: rgba(147, 197, 253, 0.8) !important;
+  border-top-color: rgba(255, 255, 255, 0.9) !important;
+  color: #FFFFFF !important;
+}
+button.primary:hover,
+.btn.primary:hover {
+  background: rgba(37, 99, 235, 0.95) !important;
+}
+
+/* 2. Header, Nav, Accounts Bar, Filter & Sort Bars -> Apple Liquid Glass */
+header,
+header.app-nav,
+nav,
+nav.accounts-bar,
+.top-banner {
+  background: rgba(var(--glass-tint-rgb), var(--glass-bar-opacity)) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-specular), 0 8px 24px rgba(10, 28, 78, 0.22) !important;
+}
+
+/* 3. Kanban Lanes -> Translucent Apple Liquid Glass Floating Over Solid Blue */
+.lane,
+main .rounded-2xl,
+main .rounded-3xl {
+  background: rgba(var(--glass-tint-rgb), var(--glass-lane-opacity)) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-specular), var(--glass-shadow) !important;
+}
+
+/* 4. Task Cards, Chips & Panels -> High-Contrast Frosted Liquid Glass */
+.task-card,
+.account-chip,
+.liquid-glass-card,
+main .rounded-xl.bg-white,
+main .rounded-lg.bg-white,
+.bg-white,
+.bg-white\/90,
+.bg-white\/95,
+.bg-white\/70 {
+  background: rgba(var(--glass-tint-rgb), var(--glass-card-opacity)) !important;
+  backdrop-filter: blur(22px) saturate(185%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(185%) !important;
+  border: 1px solid var(--glass-card-border) !important;
+  box-shadow: var(--glass-specular), 0 8px 20px rgba(10, 28, 78, 0.16) !important;
+  color: var(--card-text) !important;
+}
+
+.task-card *,
+.account-chip *,
+.liquid-glass-card * {
+  color: inherit;
+}
+
+/* 5. Inputs, Selects & Textareas -> Always High Contrast */
+input:not([type="color"]):not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.25) !important;
+  border-radius: 10px !important;
+}
+
+[data-glass-mode="dark"] input:not([type="color"]):not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+[data-glass-mode="dark"] select,
+[data-glass-mode="dark"] textarea {
+  background: rgba(15, 23, 42, 0.90) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+}
+
+/* 6. VTB Liquid Glass Cloud Hub Bar & Modals */
+.vtb-glass-hub-bar {
+  position: sticky;
+  top: 0;
+  z-index: 9990;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(30px) saturate(195%);
+  -webkit-backdrop-filter: blur(30px) saturate(195%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.52);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.80), 0 8px 24px rgba(10, 28, 78, 0.22);
+  color: #ffffff;
+  font-size: 12px;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.vtb-invite-banner {
+  margin: 8px 16px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  color: #ffffff;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 28px rgba(10, 28, 78, 0.26);
+  z-index: 9980;
+}
+
+.vtb-toast-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(360px, 92vw);
+}
+
+.vtb-toast-item {
+  padding: 12px 15px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(26px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
+  color: #0f172a;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.vtb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 24, 64, 0.52);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.vtb-modal-box {
+  width: min(680px, 96vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(var(--glass-tint-rgb), var(--glass-modal-opacity));
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  border: 1px solid var(--glass-card-border);
+  box-shadow: var(--glass-specular), 0 28px 70px rgba(0, 0, 0, 0.42);
+  color: var(--card-text);
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+/* ==========================================================================
+   VTB PRO UI — HIGH-CONTRAST MODALS, SLEEP INJECT, DROPDOWN & SETTINGS
+   ========================================================================== */
+
+/* Settings Sub-Bar */
+#vtb-settings-subbar,
+.vtb-settings-subbar {
+  position: relative;
+  z-index: 9985;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.20) !important;
+  backdrop-filter: blur(28px) saturate(195%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(195%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 8px 24px rgba(10, 28, 78, 0.22) !important;
+  color: #ffffff;
+}
+
+#vtb-settings-subbar .vtb-sub-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-top: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(0, 0, 0, 0.12);
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#vtb-settings-subbar .vtb-sub-btn:hover {
+  background: rgba(255, 255, 255, 0.36);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+#vtb-settings-subbar .vtb-sub-btn.vtb-sub-settings-trigger {
+  background: rgba(37, 99, 235, 0.75) !important;
+  border-color: rgba(147, 197, 253, 0.8) !important;
+  border-top-color: rgba(255, 255, 255, 0.95) !important;
+  color: #ffffff !important;
+}
+
+#vtb-settings-subbar .vtb-sub-btn.vtb-sub-settings-trigger:hover {
+  background: rgba(37, 99, 235, 0.90) !important;
+}
+
+/* Settings Dropdown: Apple Frosted Glass with clear dark text */
+#vtb-settings-dropdown {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  z-index: 10002;
+  width: 320px;
+  max-width: 94vw;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  animation: vtbFadeScale 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes vtbFadeScale {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#vtb-settings-dropdown button {
+  background: transparent !important;
+  color: #0f172a !important;
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  text-align: left !important;
+  padding: 9px 12px !important;
+  font-weight: 600 !important;
+  font-size: 12.5px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  transform: none !important;
+  transition: all 0.12s ease !important;
+}
+
+#vtb-settings-dropdown button:hover {
+  background: #eff6ff !important;
+  color: #2563EB !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Sleep Mode Inactivity Modal Overrides (Screenshot 1 fix) */
+[data-vtb-sleep-enhanced] {
+  color: #0f172a !important;
+}
+
+[data-vtb-sleep-enhanced] button {
+  text-shadow: none !important;
+}
+
+/* Injected Ask-In Box inside Sleep Modal */
+.vtb-sleep-inject {
+  margin: 10px 20px 8px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.04) !important;
+  color: #0f172a !important;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.vtb-sleep-inject button {
+  border-radius: 9999px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06) !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transform: none !important;
+  transition: all 0.15s ease !important;
+}
+
+/* Tab headers in snooze box */
+.vtb-sleep-inject .vtb-snooze-tab {
+  padding: 5px 12px !important;
+  font-size: 11.5px !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.vtb-sleep-inject .vtb-snooze-tab.active {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #0f172a !important;
+}
+
+/* Preset buttons in snooze box */
+.vtb-sleep-inject .vtb-preset-btn {
+  padding: 6px 12px !important;
+  font-size: 11.5px !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #94a3b8 !important;
+}
+
+.vtb-sleep-inject .vtb-preset-btn:hover {
+  background: #f1f5f9 !important;
+  border-color: #2563EB !important;
+  color: #2563EB !important;
+}
+
+.vtb-sleep-inject .vtb-preset-btn.active {
+  background: #2563EB !important;
+  color: #ffffff !important;
+  border-color: #1d4ed8 !important;
+}
+
+/* Duration inputs in snooze box */
+.vtb-sleep-inject input[type="number"],
+.vtb-sleep-inject input[type="date"],
+.vtb-sleep-inject input[type="text"] {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #94a3b8 !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  padding: 5px 8px !important;
+  text-align: center !important;
+}
+
+.vtb-sleep-inject input:focus {
+  border-color: #2563EB !important;
+  outline: 2px solid rgba(37,99,235,0.2) !important;
+}
+
+/* Primary set ask in action button */
+.vtb-sleep-inject .vtb-btn-set-ask {
+  padding: 8px 18px !important;
+  background: #2563EB !important;
+  color: #ffffff !important;
+  border: 1px solid #1d4ed8 !important;
+  border-radius: 9999px !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28) !important;
+}
+
+.vtb-sleep-inject .vtb-btn-set-ask:hover {
+  background: #1d4ed8 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.36) !important;
+}
+
+/* Modal Dialog and Pro Dialog Overrides */
+.vtb-pro-dialog,
+dialog.modal-dlg,
+.modal-dlg {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.vtb-pro-dialog button,
+dialog.modal-dlg button,
+.modal-dlg button {
+  text-shadow: none !important;
+}
+
+.vtb-pro-modal-backdrop,
+#vtb-pro-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 24, 64, 0.52);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.vtb-pro-dialog {
+  width: min(800px, 96vw);
+  max-height: 90vh;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
